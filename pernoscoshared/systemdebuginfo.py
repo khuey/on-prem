@@ -51,6 +51,7 @@ def apply_overlay(overlays_path: str, overlay: str) -> None:
 # a trace-overlay.manifest.xz containing a json-encoded map from overlay name to list of
 # build-ids, and for each overlay name, a .tar.xz to be expanded into the trace directory.
 def apply_system_debuginfo(overlays_path: str, build_ids: Mapping[str, bool]) -> None:
+    print(build_ids)
     assert base.trace_dir
     if len(build_ids) == 0:
         return
@@ -59,6 +60,7 @@ def apply_system_debuginfo(overlays_path: str, build_ids: Mapping[str, bool]) ->
     for key, value in manifest['overlays'].items():
         for v in value:
             if v in build_ids:
+                print("Using %s" % key)
                 overlays[key] = True
     # Do things deterministically to make bugs more reproducible
     for o in sorted(overlays):
