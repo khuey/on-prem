@@ -308,16 +308,24 @@ def run_rr_sources(comp_dir_substitutions: Dict[str, str], cmd: str, params: Lis
     return cast(RrSources, json.loads(rr_output))
 
 def package_source_files(allowed_source_dirs: List[str], copy_source_dirs: List[str],
-        comp_dir_substitutions: Dict[str, str], build_dir: Optional[str] = None) -> List[str]:
+    comp_dir_substitutions: Dict[str, str], build_dir: Optional[str] = None, gdb_script: Optional[str] = None) -> List[str]:
     assert base.trace_dir
-    rr_sources = run_rr_sources(comp_dir_substitutions, 'sources', [base.trace_dir])
+    params = [base.trace_dir]
+    if gdb_script:
+        params.append("--gdb-script")
+        params.append(gdb_script)
+    rr_sources = run_rr_sources(comp_dir_substitutions, 'sources', params)
     return package_source_files_from_rr_output(allowed_source_dirs, copy_source_dirs, rr_sources, comp_dir_substitutions, base.trace_dir, "user", "binary", build_dir)
 
 # Package external debuginfo files and DWOs into the trace. Does not put them
 # in the right place for gdb to find them, yet, but Pernosco will find them.
-def package_debuginfo_files() -> None:
+def package_debuginfo_files(gdb_script: Optional[str] = None) -> None:
     assert base.trace_dir
-    rr_sources = run_rr_sources({}, 'sources', [base.trace_dir])
+    params = [base.trace_dir]
+    if gdb_script:
+        params.append("--gdb-script")
+        params.append(gdb_script)
+    rr_sources = run_rr_sources({}, 'sources', params)
     package_debuginfo_from_sources_json(rr_sources, base.trace_dir)
 
 def package_debuginfo_from_sources_json(rr_sources: RrSources, output_dir: str) -> None:
@@ -347,8 +355,6 @@ def package_debuginfo_from_sources_json(rr_sources: RrSources, output_dir: str) 
             if 'build_id' in d and d['build_id'] in dwps:
                 print("Skipping", file=sys.stderr)
                 continue
-            print(dwps, file=sys.stderr)
-            print(d, file=sys.stderr)
             if 'full_path' in d:
                 path = d['full_path']
             else:
