@@ -370,7 +370,7 @@ def only_build_cmd() -> None:
         container_args.extend(["--shards", args.shards])
     if args.check_trace:
         container_args.extend(["--check-trace"])
-    container_args.extend(["on-prem", "/trace"])
+    container_args.extend(["on-prem", "--skip-gdb-add-index", "/trace"])
     container_args = ["-c", "sleep 0; db_builder %s"%" ".join(container_args)]
     env = {}
     if args.builder_rr_log:
