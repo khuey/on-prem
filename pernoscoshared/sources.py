@@ -310,10 +310,10 @@ def run_rr_sources(comp_dir_substitutions: Dict[str, str], cmd: str, params: Lis
 def package_source_files(allowed_source_dirs: List[str], copy_source_dirs: List[str],
     comp_dir_substitutions: Dict[str, str], build_dir: Optional[str] = None, gdb_script: Optional[str] = None) -> List[str]:
     assert base.trace_dir
-    params = [base.trace_dir]
+    params = []
     if gdb_script:
-        params.append("--gdb-script")
-        params.append(gdb_script)
+        params.extend(["--gdb-script", gdb_script])
+    params.append(base.trace_dir)
     rr_sources = run_rr_sources(comp_dir_substitutions, 'sources', params)
     return package_source_files_from_rr_output(allowed_source_dirs, copy_source_dirs, rr_sources, comp_dir_substitutions, base.trace_dir, "user", "binary", build_dir)
 
@@ -321,10 +321,10 @@ def package_source_files(allowed_source_dirs: List[str], copy_source_dirs: List[
 # in the right place for gdb to find them, yet, but Pernosco will find them.
 def package_debuginfo_files(gdb_script: Optional[str] = None) -> None:
     assert base.trace_dir
-    params = [base.trace_dir]
+    params = []
     if gdb_script:
-        params.append("--gdb-script")
-        params.append(gdb_script)
+        params.extend(["--gdb-script", gdb_script])
+    params.append(base.trace_dir)
     rr_sources = run_rr_sources({}, 'sources', params)
     package_debuginfo_from_sources_json(rr_sources, base.trace_dir)
 
