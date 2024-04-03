@@ -351,7 +351,7 @@ def package_build_cmd() -> None:
     packaging.package_libthread_db()
     (source_dirs, comp_dir_substitutions) = collect_source_dirs()
     if len(source_dirs) > 0:
-        repo_paths = sources.package_source_files(source_dirs, source_dirs, comp_dir_substitutions, args.gdb_script)
+        repo_paths = sources.package_source_files(source_dirs, source_dirs, comp_dir_substitutions, None, args.gdb_script)
         sources.package_gdbinit(repo_paths, "%s/gdbinit"%base.trace_dir)
     if len(args.system_debuginfo) > 0:
         build_ids = systemdebuginfo.collect_candidate_build_ids()
