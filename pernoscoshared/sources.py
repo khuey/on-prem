@@ -315,7 +315,7 @@ def package_source_files(allowed_source_dirs: List[str], copy_source_dirs: List[
         params.extend(["--gdb-script", gdb_script])
     params.append(base.trace_dir)
     rr_sources = run_rr_sources(comp_dir_substitutions, 'sources', params)
-    return package_source_files_from_rr_output(allowed_source_dirs, copy_source_dirs, rr_sources, comp_dir_substitutions, base.trace_dir, "user", "binary", build_dir)
+    return package_source_files_from_rr_output(allowed_source_dirs, copy_source_dirs, rr_sources, base.trace_dir, "user", "binary", build_dir)
 
 # Package external debuginfo files and DWOs into the trace. Does not put them
 # in the right place for gdb to find them, yet, but Pernosco will find them.
@@ -366,7 +366,7 @@ def package_debuginfo_from_sources_json(rr_sources: RrSources, output_dir: str) 
                 print("Can't find DWO file %s, skipping"%path, file=sys.stderr)
 
 def package_source_files_from_rr_output(allowed_source_dirs: List[str], copy_source_dirs: List[str], rr_sources: RrSources,
-      comp_dir_substitutions: Dict[str, str], output_dir: str, tag: str, condition_type: str, build_dir: Optional[str]=None) -> List[str]:
+      output_dir: str, tag: str, condition_type: str, build_dir: Optional[str]=None) -> List[str]:
     package_debuginfo_from_sources_json(rr_sources, output_dir)
 
     out_sources: MountRule = {};
@@ -452,14 +452,13 @@ def package_source_files_from_rr_output(allowed_source_dirs: List[str], copy_sou
     out_placeholders['priority'] = 1000
 
     all_rules = [out_sources, out_placeholders]
-    if len(comp_dir_substitutions) > 0:
-        if 'comp_dir_substitutions' in rr_sources:
-            substitutions = rr_sources['comp_dir_substitutions']
-            for sub in substitutions:
-                out_substitution: MountRule = {}
-                out_substitution['condition'] = cast(MountCondition, {condition_type: sub});
-                out_substitution['overrideCompDir'] = substitutions[sub];
-                all_rules.append(out_substitution)
+    if 'comp_dir_substitutions' in rr_sources:
+        substitutions = rr_sources['comp_dir_substitutions']
+        for sub in substitutions:
+            out_substitution: MountRule = {}
+            out_substitution['condition'] = cast(MountCondition, {condition_type: sub});
+            out_substitution['overrideCompDir'] = substitutions[sub];
+            all_rules.append(out_substitution)
 
     with open('%s/sources.%s'%(output_dir, tag), "wt") as out_f:
         json.dump(all_rules, out_f, indent=2)
